@@ -5,525 +5,323 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMS Technologies — Software Development & Digital Media</title>
     <meta name="description" content="UMS Technologies is a Pakistan-based technology company specializing in software development and digital media content creation.">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --navy-deep: #0a0e1a;
-            --navy: #0f1629;
-            --navy-light: #161d35;
-            --navy-card: #1a2240;
-            --accent: #4a8eff;
-            --accent-glow: rgba(74, 142, 255, 0.15);
-            --accent-subtle: rgba(74, 142, 255, 0.08);
-            --text-primary: #e8ecf4;
-            --text-secondary: #8a94a8;
-            --text-dim: #5a6378;
-            --border: rgba(255, 255, 255, 0.06);
+            --bg: #06080f;
+            --bg-alt: #0b0f1a;
+            --bg-card: #10152a;
+            --accent: #4d7cff;
+            --accent-2: #7b5cff;
+            --text: #e4e8f1;
+            --text-secondary: #7a829a;
+            --text-dim: #454d66;
+            --border: rgba(255, 255, 255, 0.05);
+            --gradient: linear-gradient(135deg, #4d7cff, #7b5cff);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-
         body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--navy-deep);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family: 'Inter', sans-serif; background: var(--bg);
+            color: var(--text); line-height: 1.6; overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-        }
-
+        /* NAV */
         nav {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 100;
-            padding: 1.25rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10, 14, 26, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 0 3rem; height: 72px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(6,8,15,0.7); backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border); transition: all 0.3s ease;
         }
-
+        nav.scrolled { background: rgba(6,8,15,0.95); }
         .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.02em;
-            text-decoration: none;
+            font-family: 'Instrument Serif', serif; font-size: 1.5rem;
+            color: var(--text); text-decoration: none;
+            display: flex; align-items: center; gap: 0.3rem;
         }
-
-        .logo span { color: var(--accent); }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
+        .logo-dot { width: 8px; height: 8px; background: var(--gradient); border-radius: 50%; }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
         .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            letter-spacing: 0.03em;
-            transition: color 0.3s ease;
+            color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;
+            font-weight: 500; letter-spacing: 0.02em; transition: color 0.3s; position: relative;
         }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 1.5px; background: var(--gradient); transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a:hover::after { width: 100%; }
 
-        .nav-links a:hover { color: var(--accent); }
-
+        /* HERO */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 8rem 2rem 6rem;
-            position: relative;
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 10rem 2rem 8rem; position: relative; overflow: hidden;
+        }
+        .hero-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; }
+        .hero-orb { position: absolute; border-radius: 50%; filter: blur(80px); animation: float 8s ease-in-out infinite; }
+        .hero-orb-1 { width: 500px; height: 500px; background: rgba(77,124,255,0.08); top: 10%; left: 30%; }
+        .hero-orb-2 { width: 400px; height: 400px; background: rgba(123,92,255,0.06); top: 30%; right: 20%; animation-delay: -3s; }
+        .hero-orb-3 { width: 300px; height: 300px; background: rgba(77,124,255,0.05); bottom: 10%; left: 50%; animation-delay: -5s; }
+        @keyframes float {
+            0%, 100% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(30px,-20px) scale(1.05); }
+            66% { transform: translate(-20px,20px) scale(0.95); }
+        }
+        .hero-grid {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, black, transparent);
+            -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, black, transparent);
         }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-            pointer-events: none;
+        .floating-obj { position: absolute; z-index: 1; opacity: 0.6; animation: floatObj 6s ease-in-out infinite; }
+        .floating-obj svg { filter: drop-shadow(0 4px 12px rgba(77,124,255,0.2)); }
+        .obj-1 { top: 22%; left: 15%; }
+        .obj-2 { top: 18%; right: 18%; animation-delay: -2s; }
+        .obj-3 { bottom: 25%; left: 12%; animation-delay: -4s; }
+        .obj-4 { bottom: 20%; right: 15%; animation-delay: -1s; }
+        @keyframes floatObj {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
         }
 
+        .hero-content { position: relative; z-index: 2; max-width: 800px; }
         .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 1rem;
-            background: var(--accent-subtle);
-            border: 1px solid rgba(74, 142, 255, 0.15);
-            border-radius: 100px;
-            font-size: 0.8rem;
-            color: var(--accent);
-            font-weight: 500;
-            letter-spacing: 0.04em;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.8s ease both;
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 0.45rem 1.2rem; background: rgba(77,124,255,0.08);
+            border: 1px solid rgba(77,124,255,0.15); border-radius: 100px;
+            font-size: 0.78rem; color: var(--accent); font-weight: 500;
+            letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2.5rem;
         }
-
-        .hero-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent);
+        .badge-pulse { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: relative; }
+        .badge-pulse::after {
+            content: ''; position: absolute; top: -3px; left: -3px;
+            width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+            opacity: 0; animation: pulse 2s ease-out infinite;
         }
+        @keyframes pulse { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(2); opacity: 0; } }
 
         .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            font-weight: 700;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            margin-bottom: 1.5rem;
-            max-width: 750px;
-            animation: fadeInUp 0.8s ease 0.1s both;
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(3rem,7vw,5.5rem); font-weight: 400;
+            line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.75rem;
         }
-
         .hero h1 em {
-            font-style: italic;
-            color: var(--accent);
+            font-style: italic; background: var(--gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-
-        .hero p {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 540px;
-            line-height: 1.7;
-            margin-bottom: 2.5rem;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
-
+        .hero-desc { font-size: 1.15rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto 3rem; line-height: 1.75; }
         .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.85rem 2rem;
-            background: var(--accent);
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.8s ease 0.3s both;
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            padding: 1rem 2.25rem; background: var(--gradient); color: #fff;
+            text-decoration: none; font-weight: 600; font-size: 0.9rem; border-radius: 100px;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1); box-shadow: 0 4px 24px rgba(77,124,255,0.25);
+        }
+        .hero-cta:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(77,124,255,0.35); }
+        .hero-cta svg { width: 16px; height: 16px; transition: transform 0.3s; }
+        .hero-cta:hover svg { transform: translateY(3px); }
+        .hero-scroll-line {
+            position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+            width: 1px; height: 60px; background: linear-gradient(to bottom, var(--accent), transparent);
+            opacity: 0.4; animation: scrollLine 2s ease-in-out infinite;
+        }
+        @keyframes scrollLine {
+            0% { opacity: 0; transform: translateX(-50%) scaleY(0); transform-origin: top; }
+            50% { opacity: 0.4; transform: translateX(-50%) scaleY(1); }
+            100% { opacity: 0; transform: translateX(-50%) scaleY(1); transform-origin: bottom; }
         }
 
-        .hero-cta:hover {
-            background: #3a7aee;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(74, 142, 255, 0.3);
-        }
-
-        .hero-cta svg {
-            width: 16px;
-            height: 16px;
-            transition: transform 0.3s ease;
-        }
-
-        .hero-cta:hover svg { transform: translateX(3px); }
-
-        section { padding: 6rem 2rem; }
-
-        .container {
-            max-width: 1080px;
-            margin: 0 auto;
-        }
-
+        /* SECTIONS */
+        section { padding: 7rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
         .section-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 1rem;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem;
         }
-
+        .section-label::before, .section-label::after { content: ''; width: 20px; height: 1px; background: var(--accent); opacity: 0.4; }
         .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-            line-height: 1.2;
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(2rem,4.5vw,3.2rem); font-weight: 400;
+            letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 1rem;
         }
+        .section-desc { color: var(--text-secondary); font-size: 1.05rem; max-width: 520px; margin: 0 auto; line-height: 1.75; }
 
-        .section-desc {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            max-width: 560px;
-            line-height: 1.7;
-            margin-bottom: 3.5rem;
+        /* WHAT WE DO */
+        #whatwedo { background: var(--bg-alt); position: relative; }
+        #whatwedo::before, #whatwedo::after {
+            content: ''; position: absolute; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), rgba(77,124,255,0.1), var(--border), transparent);
         }
+        #whatwedo::before { top: 0; } #whatwedo::after { bottom: 0; }
 
-        #whatwedo {
-            background: var(--navy);
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .areas-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-
+        .areas-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
         .area-card {
-            background: var(--navy-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 2.5rem 2rem;
-            transition: all 0.4s ease;
-            position: relative;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2.5rem 2rem;
+            transition: all 0.5s cubic-bezier(0.16,1,0.3,1); position: relative; overflow: hidden;
+        }
+        .area-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--gradient); transform: scaleX(0); transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+        }
+        .area-card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(77,124,255,0.05), transparent 70%);
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .area-card:hover { transform: translateY(-6px); border-color: rgba(77,124,255,0.15); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        .area-card:hover::before { transform: scaleX(1); }
+        .area-card:hover::after { opacity: 1; }
+        .area-card-inner { position: relative; z-index: 1; }
+        .area-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, rgba(77,124,255,0.12), rgba(123,92,255,0.08));
+            border: 1px solid rgba(77,124,255,0.1); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.75rem; transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+        }
+        .area-card:hover .area-icon { transform: scale(1.08); }
+        .area-icon svg { width: 24px; height: 24px; }
+        .area-card h3 { font-family: 'Instrument Serif', serif; font-size: 1.3rem; font-weight: 400; margin-bottom: 0.75rem; }
+        .area-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.75; }
+        .area-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+        .area-tag {
+            font-size: 0.72rem; padding: 0.3rem 0.8rem;
+            background: rgba(77,124,255,0.06); border: 1px solid rgba(77,124,255,0.08);
+            border-radius: 100px; color: var(--text-secondary); font-weight: 500;
+        }
+
+        /* GLOBE */
+        .globe-section {
+            position: relative; padding: 2rem 0 4rem; min-height: 85vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             overflow: hidden;
         }
-
-        .area-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.4s ease;
+        #globe-container { width: 100%; height: 550px; position: relative; z-index: 1; }
+        #globe-container canvas { display: block; margin: 0 auto; }
+        .globe-text {
+            position: relative; z-index: 2; text-align: center; padding: 0 2rem; margin-top: -3rem;
+        }
+        .globe-text h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(2rem,5vw,3.5rem); font-weight: 400;
+            font-style: italic; line-height: 1.2; letter-spacing: -0.02em; max-width: 700px; margin: 0 auto;
+        }
+        .globe-text h2 span {
+            background: var(--gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
         }
 
-        .area-card:hover {
-            border-color: rgba(74, 142, 255, 0.2);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        /* ABOUT */
+        .about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+        .about-text .section-label { justify-content: flex-start; }
+        .about-text .section-label::before { display: none; }
+        .about-text .section-title { text-align: left; }
+        .about-text p { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; margin-bottom: 1.25rem; }
+        .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 2rem 1.5rem; text-align: center; transition: all 0.4s; position: relative; overflow: hidden;
         }
-
-        .area-card:hover::before { opacity: 1; }
-
-        .area-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--accent-subtle);
-            border: 1px solid rgba(74, 142, 255, 0.12);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(77,124,255,0.04), transparent 70%);
         }
-
-        .area-icon svg {
-            width: 22px;
-            height: 22px;
-            color: var(--accent);
-        }
-
-        .area-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            letter-spacing: -0.01em;
-        }
-
-        .area-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        .area-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1.25rem;
-        }
-
-        .area-tag {
-            font-size: 0.75rem;
-            padding: 0.3rem 0.75rem;
-            background: rgba(74, 142, 255, 0.06);
-            border: 1px solid rgba(74, 142, 255, 0.1);
-            border-radius: 100px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .about-content {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .about-text p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            line-height: 1.8;
-            margin-bottom: 1.25rem;
-        }
-
-        .about-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-        }
-
-        .stat-box {
-            background: var(--navy-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.75rem 1.5rem;
-            text-align: center;
-            transition: border-color 0.3s ease;
-        }
-
-        .stat-box:hover { border-color: rgba(74, 142, 255, 0.2); }
-
+        .stat-card:hover { border-color: rgba(77,124,255,0.15); transform: translateY(-3px); }
         .stat-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-            line-height: 1;
-            margin-bottom: 0.4rem;
+            font-family: 'Instrument Serif', serif; font-size: 2.5rem;
+            background: var(--gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+            line-height: 1; margin-bottom: 0.5rem; position: relative; z-index: 1;
         }
+        .stat-label { font-size: 0.78rem; color: var(--text-dim); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1; }
 
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            font-weight: 500;
-            letter-spacing: 0.03em;
+        /* CONTACT */
+        #contact { background: var(--bg-alt); position: relative; }
+        #contact::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), rgba(77,124,255,0.1), var(--border), transparent);
         }
-
-        #contact {
-            background: var(--navy);
-            border-top: 1px solid var(--border);
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1.75rem;
-        }
-
+        .contact-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; }
+        .contact-left .section-label { justify-content: flex-start; }
+        .contact-left .section-label::before { display: none; }
+        .contact-left .section-title { text-align: left; }
+        .contact-items { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2rem; }
         .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
+            display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: all 0.3s;
         }
-
+        .contact-item:hover { border-color: rgba(77,124,255,0.15); transform: translateX(4px); }
         .contact-icon {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
-            background: var(--accent-subtle);
-            border: 1px solid rgba(74, 142, 255, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 42px; height: 42px; min-width: 42px;
+            background: linear-gradient(135deg, rgba(77,124,255,0.1), rgba(123,92,255,0.06));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
         }
-
-        .contact-icon svg {
-            width: 18px;
-            height: 18px;
-            color: var(--accent);
+        .contact-icon svg { width: 18px; height: 18px; }
+        .contact-detail-label { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.15rem; }
+        .contact-detail-value { font-size: 0.95rem; color: var(--text); }
+        .contact-detail-value a { color: var(--text); text-decoration: none; transition: color 0.3s; }
+        .contact-detail-value a:hover { color: var(--accent); }
+        .contact-form { display: flex; flex-direction: column; gap: 1.1rem; padding-top: 1rem; }
+        .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.4rem; }
+        .form-group input, .form-group textarea {
+            width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.85rem 1.1rem; color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: all 0.3s; outline: none;
         }
-
-        .contact-item-label {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
-        }
-
-        .contact-item-value {
-            font-size: 0.95rem;
-            color: var(--text-primary);
-        }
-
-        .contact-item-value a {
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .contact-item-value a:hover { color: var(--accent); }
-
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            letter-spacing: 0.03em;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            background: var(--navy-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            color: var(--text-primary);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease;
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus { border-color: var(--accent); }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 110px;
-        }
-
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(77,124,255,0.1); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
         .form-submit {
-            padding: 0.8rem 2rem;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            align-self: flex-start;
+            padding: 0.9rem 2.25rem; background: var(--gradient); color: #fff; border: none;
+            border-radius: 100px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.88rem;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); align-self: flex-start;
+            box-shadow: 0 4px 20px rgba(77,124,255,0.2);
         }
+        .form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(77,124,255,0.3); }
 
-        .form-submit:hover {
-            background: #3a7aee;
-            box-shadow: 0 6px 24px rgba(74, 142, 255, 0.3);
-        }
+        /* FOOTER */
+        footer { padding: 2.5rem 2rem; text-align: center; border-top: 1px solid var(--border); }
+        footer p { font-size: 0.8rem; color: var(--text-dim); }
 
-        footer {
-            padding: 2rem;
-            text-align: center;
-            border-top: 1px solid var(--border);
-        }
+        /* ANIMATIONS */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.9s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; } .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; } .reveal-delay-4 { transition-delay: 0.4s; }
+        .hero-content > * { opacity: 0; transform: translateY(30px); animation: heroReveal 1s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .hero-content > *:nth-child(1) { animation-delay: 0.2s; }
+        .hero-content > *:nth-child(2) { animation-delay: 0.4s; }
+        .hero-content > *:nth-child(3) { animation-delay: 0.6s; }
+        .hero-content > *:nth-child(4) { animation-delay: 0.8s; }
+        @keyframes heroReveal { to { opacity: 1; transform: translateY(0); } }
 
-        footer p {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            nav { padding: 1rem 1.25rem; }
-            .nav-links { gap: 1.25rem; }
-            .nav-links a { font-size: 0.8rem; }
-            .hero { padding: 7rem 1.5rem 4rem; }
-            section { padding: 4rem 1.5rem; }
+        @media (max-width: 900px) {
+            nav { padding: 0 1.5rem; } .nav-links { gap: 1.5rem; }
             .areas-grid { grid-template-columns: 1fr; }
-            .about-content { grid-template-columns: 1fr; gap: 2.5rem; }
-            .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+            .about-layout, .contact-layout { grid-template-columns: 1fr; gap: 3rem; }
+            .floating-obj { display: none; }
         }
-
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
+            nav { padding: 0 1rem; height: 64px; } .logo { font-size: 1.3rem; }
+            .nav-links { gap: 1rem; } .nav-links a { font-size: 0.8rem; }
+            .hero { padding: 8rem 1.5rem 5rem; } section { padding: 5rem 1.5rem; }
             .about-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+            #globe-container { height: 380px; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="#" class="logo">UMS<span>.</span></a>
+    <nav id="navbar">
+        <a href="#" class="logo">UMS Technologies<span class="logo-dot"></span></a>
         <ul class="nav-links">
             <li><a href="#whatwedo">What We Do</a></li>
             <li><a href="#about">About</a></li>
@@ -532,90 +330,77 @@
     </nav>
 
     <section class="hero">
-        <div class="hero-badge">SECP Registered Company</div>
-        <h1>A Technology Company Focused on <em>Software</em> &amp; <em>Digital Media</em></h1>
-        <p>UMS Technologies builds software products and creates digital media content — developing apps, producing content, and leveraging technology to innovate.</p>
-        <a href="#whatwedo" class="hero-cta">
-            Learn More
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg>
-        </a>
+        <div class="hero-bg">
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+            <div class="hero-grid"></div>
+        </div>
+        <div class="floating-obj obj-1"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" stroke="#4d7cff" stroke-width="1.5" opacity="0.5"/><circle cx="24" cy="38" r="2" fill="#4d7cff" opacity="0.4"/><line x1="14" y1="12" x2="34" y2="12" stroke="#4d7cff" stroke-width="1" opacity="0.3"/></svg></div>
+        <div class="floating-obj obj-2"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><polygon points="22,4 40,15 40,33 22,44 4,33 4,15" stroke="#7b5cff" stroke-width="1.5" opacity="0.4"/><circle cx="22" cy="22" r="6" stroke="#7b5cff" stroke-width="1" opacity="0.3"/></svg></div>
+        <div class="floating-obj obj-3"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M8 12L20 4L32 12V28L20 36L8 28Z" stroke="#4d7cff" stroke-width="1.5" opacity="0.4"/></svg></div>
+        <div class="floating-obj obj-4"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="4" y="4" width="28" height="28" rx="6" stroke="#7b5cff" stroke-width="1.5" opacity="0.4"/><path d="M12 18L16 22L24 14" stroke="#7b5cff" stroke-width="1.5" opacity="0.3"/></svg></div>
+
+        <div class="hero-content">
+            <div class="hero-badge"><span class="badge-pulse"></span>SECP Registered Company</div>
+            <h1>A Technology Company<br>Focused on <em>Software</em><br>&amp; <em>Digital Media</em></h1>
+            <p class="hero-desc">UMS Technologies builds software products and creates digital media content — developing apps, producing content, and leveraging technology to innovate.</p>
+            <a href="#whatwedo" class="hero-cta">Learn More <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg></a>
+        </div>
+        <div class="hero-scroll-line"></div>
     </section>
 
     <section id="whatwedo">
         <div class="container">
-            <div class="section-label fade-in">What We Do</div>
-            <h2 class="section-title fade-in">Our Focus Areas</h2>
-            <p class="section-desc fade-in">We operate across software development, digital media, and emerging technology — building our own products and content.</p>
-
+            <div class="section-header reveal">
+                <div class="section-label">What We Do</div>
+                <h2 class="section-title">Our Focus Areas</h2>
+                <p class="section-desc">We operate across software development, digital media, and emerging technology — building our own products and content.</p>
+            </div>
             <div class="areas-grid">
-                <div class="area-card fade-in">
-                    <div class="area-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
-                    </div>
+                <div class="area-card reveal reveal-delay-1"><div class="area-card-inner">
+                    <div class="area-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><defs><linearGradient id="ig" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4d7cff"/><stop offset="100%" stop-color="#7b5cff"/></linearGradient></defs><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg></div>
                     <h3>Software &amp; App Development</h3>
                     <p>We design and develop our own mobile applications — taking products from idea to launch with a focus on clean user experience and thoughtful design.</p>
-                    <div class="area-tags">
-                        <span class="area-tag">iOS Apps</span>
-                        <span class="area-tag">SwiftUI</span>
-                        <span class="area-tag">Product Design</span>
-                    </div>
-                </div>
-
-                <div class="area-card fade-in">
-                    <div class="area-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
-                    </div>
+                    <div class="area-tags"><span class="area-tag">iOS Apps</span><span class="area-tag">SwiftUI</span><span class="area-tag">Product Design</span></div>
+                </div></div>
+                <div class="area-card reveal reveal-delay-2"><div class="area-card-inner">
+                    <div class="area-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg></div>
                     <h3>Digital Media &amp; Content</h3>
-                    <p>We produce and manage our own digital media channels, creating content that reaches global audiences — combining creative storytelling with data-driven growth strategies.</p>
-                    <div class="area-tags">
-                        <span class="area-tag">YouTube</span>
-                        <span class="area-tag">Content Creation</span>
-                        <span class="area-tag">Audience Growth</span>
-                    </div>
-                </div>
-
-                <div class="area-card fade-in">
-                    <div class="area-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
-                    </div>
+                    <p>We produce and manage our own digital media channels, creating content that reaches global audiences — combining creative storytelling with data-driven growth.</p>
+                    <div class="area-tags"><span class="area-tag">YouTube</span><span class="area-tag">Content Creation</span><span class="area-tag">Audience Growth</span></div>
+                </div></div>
+                <div class="area-card reveal reveal-delay-3"><div class="area-card-inner">
+                    <div class="area-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
                     <h3>Technology &amp; Innovation</h3>
                     <p>We explore emerging technologies and apply them across our operations — from AI-driven workflows to new digital platforms — staying ahead of the curve.</p>
-                    <div class="area-tags">
-                        <span class="area-tag">AI &amp; Automation</span>
-                        <span class="area-tag">R&amp;D</span>
-                        <span class="area-tag">Emerging Tech</span>
-                    </div>
-                </div>
+                    <div class="area-tags"><span class="area-tag">AI &amp; Automation</span><span class="area-tag">R&amp;D</span><span class="area-tag">Emerging Tech</span></div>
+                </div></div>
             </div>
         </div>
     </section>
 
+    <div class="globe-section">
+        <div id="globe-container"></div>
+        <div class="globe-text reveal">
+            <h2>Innovating from <span>Pakistan</span>,<br>building for the world.</h2>
+        </div>
+    </div>
+
     <section id="about">
         <div class="container">
-            <div class="about-content">
+            <div class="about-layout">
                 <div class="about-text">
-                    <div class="section-label fade-in">About</div>
-                    <h2 class="section-title fade-in">Built on Curiosity, Driven by Execution</h2>
-                    <p class="fade-in">UMS Technologies is a registered technology company based in Pakistan. We build our own software products, create digital media content, and invest in innovation across multiple verticals.</p>
-                    <p class="fade-in">From developing iOS applications like ScreenPet and BlessRise, to running digital content operations on YouTube, everything we do is built in-house with a focus on quality and long-term growth.</p>
+                    <div class="section-label reveal">About</div>
+                    <h2 class="section-title reveal reveal-delay-1">Built on Curiosity,<br>Driven by Execution</h2>
+                    <p class="reveal reveal-delay-2">UMS Technologies is a registered technology company based in Pakistan. We build our own software products, create digital media content, and invest in innovation across multiple verticals.</p>
+                    <p class="reveal reveal-delay-3">From developing iOS applications like ScreenPet and BlessRise, to running digital content operations on YouTube, everything we do is built in-house with a focus on quality and long-term growth.</p>
                 </div>
-                <div class="about-stats fade-in">
-                    <div class="stat-box">
-                        <div class="stat-number">3</div>
-                        <div class="stat-label">Focus Areas</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number">iOS</div>
-                        <div class="stat-label">App Platform</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number">PK</div>
-                        <div class="stat-label">Based In Pakistan</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number">SECP</div>
-                        <div class="stat-label">Registered</div>
-                    </div>
+                <div class="about-stats">
+                    <div class="stat-card reveal reveal-delay-1"><div class="stat-number">3</div><div class="stat-label">Focus Areas</div></div>
+                    <div class="stat-card reveal reveal-delay-2"><div class="stat-number">iOS</div><div class="stat-label">App Platform</div></div>
+                    <div class="stat-card reveal reveal-delay-3"><div class="stat-number">PK</div><div class="stat-label">Based in Pakistan</div></div>
+                    <div class="stat-card reveal reveal-delay-4"><div class="stat-number">SECP</div><div class="stat-label">Registered</div></div>
                 </div>
             </div>
         </div>
@@ -623,75 +408,335 @@
 
     <section id="contact">
         <div class="container">
-            <div class="section-label fade-in">Contact</div>
-            <h2 class="section-title fade-in">Business Inquiries</h2>
-            <p class="section-desc fade-in">Interested in partnerships, collaborations, or have a business inquiry? We'd love to hear from you.</p>
-
-            <div class="contact-grid">
-                <div class="contact-info fade-in">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                        </div>
-                        <div>
-                            <div class="contact-item-label">Email</div>
-                            <div class="contact-item-value"><a href="mailto:contact@umstechnologies.co">contact@umstechnologies.co</a></div>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-                        </div>
-                        <div>
-                            <div class="contact-item-label">Website</div>
-                            <div class="contact-item-value"><a href="https://umstechnologies.co">umstechnologies.co</a></div>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-                        </div>
-                        <div>
-                            <div class="contact-item-label">Location</div>
-                            <div class="contact-item-value">Pakistan</div>
-                        </div>
+            <div class="contact-layout">
+                <div class="contact-left">
+                    <div class="section-label reveal">Contact</div>
+                    <h2 class="section-title reveal reveal-delay-1">Business Inquiries</h2>
+                    <p class="section-desc reveal reveal-delay-2" style="text-align:left;margin:0">Interested in partnerships, collaborations, or have a business inquiry? We'd love to hear from you.</p>
+                    <div class="contact-items">
+                        <div class="contact-item reveal reveal-delay-2"><div class="contact-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg></div><div><div class="contact-detail-label">Email</div><div class="contact-detail-value"><a href="mailto:contact@umstechnologies.co">contact@umstechnologies.co</a></div></div></div>
+                        <div class="contact-item reveal reveal-delay-3"><div class="contact-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg></div><div><div class="contact-detail-label">Website</div><div class="contact-detail-value"><a href="https://umstechnologies.co">umstechnologies.co</a></div></div></div>
+                        <div class="contact-item reveal reveal-delay-4"><div class="contact-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="url(#ig)"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg></div><div><div class="contact-detail-label">Location</div><div class="contact-detail-value">Pakistan</div></div></div>
                     </div>
                 </div>
-
-                <div class="contact-form fade-in">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" placeholder="Your name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" placeholder="your@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Message</label>
-                        <textarea placeholder="Tell us about your inquiry..."></textarea>
-                    </div>
+                <div class="contact-form reveal reveal-delay-2">
+                    <div class="form-group"><label>Name</label><input type="text" placeholder="Your name"></div>
+                    <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com"></div>
+                    <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your inquiry..."></textarea></div>
                     <button class="form-submit" onclick="alert('Thank you for reaching out! We will get back to you soon.')">Send Message</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer>
-        <p>&copy; 2026 UMS Technologies. All rights reserved.</p>
-    </footer>
+    <footer><p>&copy; 2026 UMS Technologies. All rights reserved.</p></footer>
 
     <script>
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+    // Scroll reveal
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    // Nav
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+    const secs = document.querySelectorAll('section[id]');
+    const nls = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+        let c = '';
+        secs.forEach(s => { if (window.scrollY >= s.offsetTop - 100) c = s.id; });
+        nls.forEach(l => { l.style.color = l.getAttribute('href') === '#' + c ? 'var(--text)' : ''; });
+    });
+
+    // === THREE.JS GLOBE ===
+    (function() {
+        const container = document.getElementById('globe-container');
+        if (!container) return;
+        const w = container.clientWidth, h = container.clientHeight;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+        camera.position.z = 2.8;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(w, h);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const globe = new THREE.Group();
+        scene.add(globe);
+
+        const R = 1;
+
+        // --- Pakistan border (simplified polygon, lon/lat pairs) ---
+        const pkBorder = [
+            [61.8,25.1],[62.8,25.2],[63.5,25.2],[64.1,25.4],[64.8,25.1],
+            [65.5,25.4],[66.4,25.5],[66.7,25.2],[67.0,24.8],[67.5,24.5],
+            [68.2,24.3],[68.5,24.4],[68.8,24.6],[69.5,24.8],[70.0,24.9],
+            [70.3,25.7],[70.1,26.5],[69.5,27.0],[69.3,27.5],[69.6,28.0],
+            [70.0,28.0],[70.3,27.9],[70.6,27.8],[71.0,27.9],[71.5,28.0],
+            [71.9,28.0],[72.3,28.7],[72.1,29.2],[71.8,29.6],[71.1,30.0],
+            [70.8,30.5],[70.4,30.9],[69.9,31.2],[69.3,31.9],[69.0,32.5],
+            [69.3,33.0],[69.9,33.6],[70.3,33.9],[70.0,34.0],[69.6,34.2],
+            [69.3,34.5],[69.8,35.0],[70.5,35.5],[71.0,36.0],[71.6,36.2],
+            [71.3,36.6],[71.2,36.8],[72.3,36.9],[73.5,36.8],[74.5,37.0],
+            [75.0,36.9],[75.8,36.5],[76.0,35.8],[76.2,35.2],[76.8,35.0],
+            [77.0,35.5],[77.0,34.9],[76.5,34.3],[75.7,34.5],[75.0,34.6],
+            [74.3,34.2],[73.9,34.0],[73.3,34.0],[74.0,33.2],[74.2,32.8],
+            [74.6,32.5],[74.8,32.0],[74.5,31.5],[74.0,31.0],[73.8,30.5],
+            [73.5,30.0],[73.0,29.5],[72.5,29.0],[72.0,28.5],[71.0,27.5],
+            [70.5,27.0],[70.0,26.5],[69.5,26.0],[69.0,25.5],[68.2,26.0],
+            [67.5,26.5],[67.0,26.0],[66.5,25.8],[66.0,25.5],[65.0,25.6],
+            [64.0,25.3],[63.0,25.2],[61.8,25.1]
+        ];
+
+        function pointInPakistan(lat, lon) {
+            let inside = false;
+            for (let i = 0, j = pkBorder.length - 1; i < pkBorder.length; j = i++) {
+                const xi = pkBorder[i][0], yi = pkBorder[i][1];
+                const xj = pkBorder[j][0], yj = pkBorder[j][1];
+                if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) {
+                    inside = !inside;
                 }
-            });
-        }, { threshold: 0.1 });
+            }
+            return inside;
+        }
 
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        function ll2v(lat, lon, r) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = (lon + 180) * Math.PI / 180;
+            return new THREE.Vector3(
+                -r * Math.sin(phi) * Math.cos(theta),
+                r * Math.cos(phi),
+                r * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+
+        // Detailed land check
+        function isLand(lat, lon) {
+            // North America
+            if (lat > 48 && lat < 72 && lon > -170 && lon < -50) return true; // Canada/Alaska
+            if (lat > 25 && lat < 50 && lon > -130 && lon < -65) return true; // USA
+            if (lat > 15 && lat < 33 && lon > -120 && lon < -85) return true; // Mexico
+            // Central America
+            if (lat > 7 && lat < 18 && lon > -92 && lon < -77) return true;
+            // South America
+            if (lat > -5 && lat < 12 && lon > -80 && lon < -50) return true;
+            if (lat > -25 && lat < 0 && lon > -75 && lon < -35) return true;
+            if (lat > -40 && lat < -20 && lon > -72 && lon < -40) return true;
+            if (lat > -56 && lat < -38 && lon > -75 && lon < -62) return true;
+            // Europe
+            if (lat > 36 && lat < 45 && lon > -10 && lon < 3) return true; // Iberia
+            if (lat > 42 && lat < 51 && lon > -5 && lon < 8) return true; // France
+            if (lat > 47 && lat < 55 && lon > 5 && lon < 15) return true; // Germany
+            if (lat > 50 && lat < 60 && lon > -8 && lon < 2) return true; // UK
+            if (lat > 56 && lat < 71 && lon > 4 && lon < 32) return true; // Scandinavia
+            if (lat > 36 && lat < 47 && lon > 6 && lon < 19) return true; // Italy/Balkans
+            if (lat > 46 && lat < 56 && lon > 14 && lon < 24) return true; // E. Europe
+            if (lat > 35 && lat < 42 && lon > 19 && lon < 30) return true; // Greece/Turkey
+            // Russia
+            if (lat > 50 && lat < 75 && lon > 30 && lon < 180) return true;
+            if (lat > 45 && lat < 55 && lon > 30 && lon < 55) return true;
+            // Middle East
+            if (lat > 12 && lat < 38 && lon > 34 && lon < 55) return true;
+            // Central Asia
+            if (lat > 35 && lat < 50 && lon > 50 && lon < 80) return true;
+            // South Asia
+            if (lat > 8 && lat < 37 && lon > 60 && lon < 98) return true;
+            // East Asia
+            if (lat > 18 && lat < 54 && lon > 98 && lon < 135) return true;
+            // Southeast Asia
+            if (lat > -8 && lat < 20 && lon > 95 && lon < 120) return true;
+            // Japan/Korea
+            if (lat > 30 && lat < 46 && lon > 128 && lon < 146) return true;
+            // Africa
+            if (lat > 20 && lat < 37 && lon > -17 && lon < 35) return true; // N. Africa
+            if (lat > 4 && lat < 22 && lon > -18 && lon < 42) return true; // W/C Africa
+            if (lat > -5 && lat < 5 && lon > 12 && lon < 42) return true; // Equatorial
+            if (lat > -20 && lat < 0 && lon > 12 && lon < 42) return true; // E. Africa
+            if (lat > -35 && lat < -20 && lon > 16 && lon < 40) return true; // S. Africa
+            // Australia
+            if (lat > -40 && lat < -12 && lon > 114 && lon < 154) return true;
+            // New Zealand
+            if (lat > -47 && lat < -34 && lon > 166 && lon < 179) return true;
+            return false;
+        }
+
+        // Create dot positions
+        const positions = [], colors = [], sizes = [];
+        const landColor = [0.28, 0.32, 0.42];
+        const oceanDotColor = [0.12, 0.14, 0.22];
+        const pkColor = [0.30, 0.49, 1.0];
+        const pkGlowColor = [0.45, 0.60, 1.0];
+
+        // Uniform sphere sampling via golden spiral
+        const numPoints = 12000;
+        const goldenRatio = (1 + Math.sqrt(5)) / 2;
+
+        for (let i = 0; i < numPoints; i++) {
+            const lat = Math.asin(1 - 2 * (i + 0.5) / numPoints) * 180 / Math.PI;
+            const lon = ((i / goldenRatio) % 1) * 360 - 180;
+
+            const land = isLand(lat, lon);
+            const pk = pointInPakistan(lat, lon);
+
+            if (!land) {
+                // sparse ocean dots
+                if (Math.random() > 0.06) continue;
+                const p = ll2v(lat, lon, R);
+                positions.push(p.x, p.y, p.z);
+                colors.push(...oceanDotColor);
+                sizes.push(0.8);
+            } else if (pk) {
+                const p = ll2v(lat, lon, R * 1.002);
+                positions.push(p.x, p.y, p.z);
+                colors.push(...pkColor);
+                sizes.push(2.2);
+            } else {
+                const p = ll2v(lat, lon, R);
+                positions.push(p.x, p.y, p.z);
+                colors.push(...landColor);
+                sizes.push(1.2);
+            }
+        }
+
+        // Extra dense Pakistan fill
+        for (let i = 0; i < 2000; i++) {
+            const lat = 24 + Math.random() * 13;
+            const lon = 61 + Math.random() * 16;
+            if (pointInPakistan(lat, lon)) {
+                const p = ll2v(lat, lon, R * 1.003);
+                positions.push(p.x, p.y, p.z);
+                colors.push(...pkGlowColor);
+                sizes.push(1.5 + Math.random() * 1.2);
+            }
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geo.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+        const mat = new THREE.ShaderMaterial({
+            vertexShader: `
+                attribute float size;
+                attribute vec3 color;
+                varying vec3 vColor;
+                varying float vAlpha;
+                void main() {
+                    vColor = color;
+                    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+                    // Hide backside dots
+                    vec3 worldNorm = normalize((modelMatrix * vec4(position, 0.0)).xyz);
+                    vec3 viewDir = normalize(cameraPosition - (modelMatrix * vec4(position, 1.0)).xyz);
+                    float facing = dot(worldNorm, viewDir);
+                    vAlpha = smoothstep(-0.05, 0.3, facing);
+                    gl_PointSize = size * (250.0 / -mv.z) * (0.5 + 0.5 * vAlpha);
+                    gl_Position = projectionMatrix * mv;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                varying float vAlpha;
+                void main() {
+                    float d = length(gl_PointCoord - 0.5);
+                    if (d > 0.5) discard;
+                    float a = smoothstep(0.5, 0.15, d) * vAlpha;
+                    gl_FragColor = vec4(vColor, a);
+                }
+            `,
+            transparent: true,
+            depthWrite: false,
+        });
+
+        globe.add(new THREE.Points(geo, mat));
+
+        // Subtle atmosphere ring
+        const atmosGeo = new THREE.SphereGeometry(R * 1.04, 64, 64);
+        const atmosMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                varying vec3 vPosition;
+                void main() {
+                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+                    gl_FragColor = vec4(0.30, 0.49, 1.0, intensity * 0.25);
+                }
+            `,
+            transparent: true,
+            side: THREE.BackSide,
+            depthWrite: false,
+        });
+        globe.add(new THREE.Mesh(atmosGeo, atmosMat));
+
+        // Subtle latitude/longitude lines
+        const gridMat = new THREE.LineBasicMaterial({ color: 0x1a2040, transparent: true, opacity: 0.12 });
+        // Latitude
+        for (let lat = -60; lat <= 60; lat += 30) {
+            const pts = [];
+            for (let lon = 0; lon <= 360; lon += 3) {
+                pts.push(ll2v(lat, lon - 180, R * 1.001));
+            }
+            const g = new THREE.BufferGeometry().setFromPoints(pts);
+            globe.add(new THREE.Line(g, gridMat));
+        }
+        // Longitude
+        for (let lon = 0; lon < 360; lon += 30) {
+            const pts = [];
+            for (let lat = -90; lat <= 90; lat += 3) {
+                pts.push(ll2v(lat, lon - 180, R * 1.001));
+            }
+            const g = new THREE.BufferGeometry().setFromPoints(pts);
+            globe.add(new THREE.Line(g, gridMat));
+        }
+
+        // Pakistan glow (small, tight)
+        const pkCenter = ll2v(30, 68.5, R * 1.01);
+        const glowGeo = new THREE.SphereGeometry(0.07, 16, 16);
+        const glowMat = new THREE.MeshBasicMaterial({ color: 0x4d7cff, transparent: true, opacity: 0.3 });
+        const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+        glowMesh.position.copy(pkCenter);
+        globe.add(glowMesh);
+
+        // Start rotation facing Pakistan
+        globe.rotation.y = -1.2;
+        globe.rotation.x = 0.15;
+
+        let scrollSpeed = 0, lastScroll = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const d = Math.abs(window.scrollY - lastScroll);
+            scrollSpeed = Math.min(d * 0.0003, 0.025);
+            lastScroll = window.scrollY;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            globe.rotation.y += 0.0015 + scrollSpeed;
+            scrollSpeed *= 0.95;
+            const t = Date.now() * 0.002;
+            glowMesh.scale.setScalar(1 + Math.sin(t) * 0.2);
+            glowMesh.material.opacity = 0.25 + Math.sin(t) * 0.1;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const nw = container.clientWidth, nh = container.clientHeight;
+            camera.aspect = nw / nh;
+            camera.updateProjectionMatrix();
+            renderer.setSize(nw, nh);
+        });
+    })();
     </script>
-
 </body>
 </html>
