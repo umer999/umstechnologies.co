@@ -7,6 +7,7 @@
     <meta name="description" content="UMS Technologies is a Pakistan-based technology company specializing in software development and digital media content creation.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <style>
         :root {
             --bg: #06080f;
@@ -394,7 +395,7 @@
                     <div class="section-label reveal">About</div>
                     <h2 class="section-title reveal reveal-delay-1">Built on Curiosity,<br>Driven by Execution</h2>
                     <p class="reveal reveal-delay-2">UMS Technologies is a registered technology company based in Pakistan. We build our own software products, create digital media content, and invest in innovation across multiple verticals.</p>
-                    <p class="reveal reveal-delay-3">From developing iOS applications like ScreenPet and BlessRise, to running digital content operations on YouTube, everything we do is built in-house with a focus on quality and long-term growth.</p>
+                    <p class="reveal reveal-delay-3">From developing iOS applications, to running digital content operations on YouTube, everything we do is built in-house with a focus on quality and long-term growth.</p>
                 </div>
                 <div class="about-stats">
                     <div class="stat-card reveal reveal-delay-1"><div class="stat-number">3</div><div class="stat-label">Focus Areas</div></div>
@@ -450,288 +451,336 @@
         nls.forEach(l => { l.style.color = l.getAttribute('href') === '#' + c ? 'var(--text)' : ''; });
     });
 
-    // === THREE.JS GLOBE ===
+    // === THREE.JS GLOBE WITH REAL WORLD MAP ===
     (function() {
-        const container = document.getElementById('globe-container');
+        var container = document.getElementById('globe-container');
         if (!container) return;
-        const w = container.clientWidth, h = container.clientHeight;
+        var w = container.clientWidth, h = container.clientHeight;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-        camera.position.z = 2.8;
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+        camera.position.z = 2.5;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(w, h);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        const globe = new THREE.Group();
+        var globe = new THREE.Group();
         scene.add(globe);
+        var R = 1;
 
-        const R = 1;
+        // Dark inner sphere — hides lines/dots on the backside
+        var innerSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(R * 0.997, 64, 64),
+            new THREE.MeshBasicMaterial({ color: 0x06080f })
+        );
+        globe.add(innerSphere);
 
-        // --- Pakistan border (simplified polygon, lon/lat pairs) ---
-        const pkBorder = [
-            [61.8,25.1],[62.8,25.2],[63.5,25.2],[64.1,25.4],[64.8,25.1],
-            [65.5,25.4],[66.4,25.5],[66.7,25.2],[67.0,24.8],[67.5,24.5],
-            [68.2,24.3],[68.5,24.4],[68.8,24.6],[69.5,24.8],[70.0,24.9],
-            [70.3,25.7],[70.1,26.5],[69.5,27.0],[69.3,27.5],[69.6,28.0],
-            [70.0,28.0],[70.3,27.9],[70.6,27.8],[71.0,27.9],[71.5,28.0],
-            [71.9,28.0],[72.3,28.7],[72.1,29.2],[71.8,29.6],[71.1,30.0],
-            [70.8,30.5],[70.4,30.9],[69.9,31.2],[69.3,31.9],[69.0,32.5],
-            [69.3,33.0],[69.9,33.6],[70.3,33.9],[70.0,34.0],[69.6,34.2],
-            [69.3,34.5],[69.8,35.0],[70.5,35.5],[71.0,36.0],[71.6,36.2],
-            [71.3,36.6],[71.2,36.8],[72.3,36.9],[73.5,36.8],[74.5,37.0],
-            [75.0,36.9],[75.8,36.5],[76.0,35.8],[76.2,35.2],[76.8,35.0],
-            [77.0,35.5],[77.0,34.9],[76.5,34.3],[75.7,34.5],[75.0,34.6],
-            [74.3,34.2],[73.9,34.0],[73.3,34.0],[74.0,33.2],[74.2,32.8],
-            [74.6,32.5],[74.8,32.0],[74.5,31.5],[74.0,31.0],[73.8,30.5],
-            [73.5,30.0],[73.0,29.5],[72.5,29.0],[72.0,28.5],[71.0,27.5],
-            [70.5,27.0],[70.0,26.5],[69.5,26.0],[69.0,25.5],[68.2,26.0],
-            [67.5,26.5],[67.0,26.0],[66.5,25.8],[66.0,25.5],[65.0,25.6],
-            [64.0,25.3],[63.0,25.2],[61.8,25.1]
-        ];
-
-        function pointInPakistan(lat, lon) {
-            let inside = false;
-            for (let i = 0, j = pkBorder.length - 1; i < pkBorder.length; j = i++) {
-                const xi = pkBorder[i][0], yi = pkBorder[i][1];
-                const xj = pkBorder[j][0], yj = pkBorder[j][1];
-                if ((yi > lat) !== (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        }
-
+        // Convert lat/lon to 3D point
         function ll2v(lat, lon, r) {
-            const phi = (90 - lat) * Math.PI / 180;
-            const theta = (lon + 180) * Math.PI / 180;
+            var p = (90 - lat) * Math.PI / 180;
+            var t = (lon + 180) * Math.PI / 180;
             return new THREE.Vector3(
-                -r * Math.sin(phi) * Math.cos(theta),
-                r * Math.cos(phi),
-                r * Math.sin(phi) * Math.sin(theta)
+                -r * Math.sin(p) * Math.cos(t),
+                r * Math.cos(p),
+                r * Math.sin(p) * Math.sin(t)
             );
         }
 
-        // Detailed land check
-        function isLand(lat, lon) {
-            // North America
-            if (lat > 48 && lat < 72 && lon > -170 && lon < -50) return true; // Canada/Alaska
-            if (lat > 25 && lat < 50 && lon > -130 && lon < -65) return true; // USA
-            if (lat > 15 && lat < 33 && lon > -120 && lon < -85) return true; // Mexico
-            // Central America
-            if (lat > 7 && lat < 18 && lon > -92 && lon < -77) return true;
-            // South America
-            if (lat > -5 && lat < 12 && lon > -80 && lon < -50) return true;
-            if (lat > -25 && lat < 0 && lon > -75 && lon < -35) return true;
-            if (lat > -40 && lat < -20 && lon > -72 && lon < -40) return true;
-            if (lat > -56 && lat < -38 && lon > -75 && lon < -62) return true;
-            // Europe
-            if (lat > 36 && lat < 45 && lon > -10 && lon < 3) return true; // Iberia
-            if (lat > 42 && lat < 51 && lon > -5 && lon < 8) return true; // France
-            if (lat > 47 && lat < 55 && lon > 5 && lon < 15) return true; // Germany
-            if (lat > 50 && lat < 60 && lon > -8 && lon < 2) return true; // UK
-            if (lat > 56 && lat < 71 && lon > 4 && lon < 32) return true; // Scandinavia
-            if (lat > 36 && lat < 47 && lon > 6 && lon < 19) return true; // Italy/Balkans
-            if (lat > 46 && lat < 56 && lon > 14 && lon < 24) return true; // E. Europe
-            if (lat > 35 && lat < 42 && lon > 19 && lon < 30) return true; // Greece/Turkey
-            // Russia
-            if (lat > 50 && lat < 75 && lon > 30 && lon < 180) return true;
-            if (lat > 45 && lat < 55 && lon > 30 && lon < 55) return true;
-            // Middle East
-            if (lat > 12 && lat < 38 && lon > 34 && lon < 55) return true;
-            // Central Asia
-            if (lat > 35 && lat < 50 && lon > 50 && lon < 80) return true;
-            // South Asia
-            if (lat > 8 && lat < 37 && lon > 60 && lon < 98) return true;
-            // East Asia
-            if (lat > 18 && lat < 54 && lon > 98 && lon < 135) return true;
-            // Southeast Asia
-            if (lat > -8 && lat < 20 && lon > 95 && lon < 120) return true;
-            // Japan/Korea
-            if (lat > 30 && lat < 46 && lon > 128 && lon < 146) return true;
-            // Africa
-            if (lat > 20 && lat < 37 && lon > -17 && lon < 35) return true; // N. Africa
-            if (lat > 4 && lat < 22 && lon > -18 && lon < 42) return true; // W/C Africa
-            if (lat > -5 && lat < 5 && lon > 12 && lon < 42) return true; // Equatorial
-            if (lat > -20 && lat < 0 && lon > 12 && lon < 42) return true; // E. Africa
-            if (lat > -35 && lat < -20 && lon > 16 && lon < 40) return true; // S. Africa
-            // Australia
-            if (lat > -40 && lat < -12 && lon > 114 && lon < 154) return true;
-            // New Zealand
-            if (lat > -47 && lat < -34 && lon > 166 && lon < 179) return true;
-            return false;
-        }
-
-        // Create dot positions
-        const positions = [], colors = [], sizes = [];
-        const landColor = [0.28, 0.32, 0.42];
-        const oceanDotColor = [0.12, 0.14, 0.22];
-        const pkColor = [0.30, 0.49, 1.0];
-        const pkGlowColor = [0.45, 0.60, 1.0];
-
-        // Uniform sphere sampling via golden spiral
-        const numPoints = 12000;
-        const goldenRatio = (1 + Math.sqrt(5)) / 2;
-
-        for (let i = 0; i < numPoints; i++) {
-            const lat = Math.asin(1 - 2 * (i + 0.5) / numPoints) * 180 / Math.PI;
-            const lon = ((i / goldenRatio) % 1) * 360 - 180;
-
-            const land = isLand(lat, lon);
-            const pk = pointInPakistan(lat, lon);
-
-            if (!land) {
-                // sparse ocean dots
-                if (Math.random() > 0.06) continue;
-                const p = ll2v(lat, lon, R);
-                positions.push(p.x, p.y, p.z);
-                colors.push(...oceanDotColor);
-                sizes.push(0.8);
-            } else if (pk) {
-                const p = ll2v(lat, lon, R * 1.002);
-                positions.push(p.x, p.y, p.z);
-                colors.push(...pkColor);
-                sizes.push(2.2);
-            } else {
-                const p = ll2v(lat, lon, R);
-                positions.push(p.x, p.y, p.z);
-                colors.push(...landColor);
-                sizes.push(1.2);
-            }
-        }
-
-        // Extra dense Pakistan fill
-        for (let i = 0; i < 2000; i++) {
-            const lat = 24 + Math.random() * 13;
-            const lon = 61 + Math.random() * 16;
-            if (pointInPakistan(lat, lon)) {
-                const p = ll2v(lat, lon, R * 1.003);
-                positions.push(p.x, p.y, p.z);
-                colors.push(...pkGlowColor);
-                sizes.push(1.5 + Math.random() * 1.2);
-            }
-        }
-
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        geo.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
-
-        const mat = new THREE.ShaderMaterial({
-            vertexShader: `
-                attribute float size;
-                attribute vec3 color;
-                varying vec3 vColor;
-                varying float vAlpha;
-                void main() {
-                    vColor = color;
-                    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-                    // Hide backside dots
-                    vec3 worldNorm = normalize((modelMatrix * vec4(position, 0.0)).xyz);
-                    vec3 viewDir = normalize(cameraPosition - (modelMatrix * vec4(position, 1.0)).xyz);
-                    float facing = dot(worldNorm, viewDir);
-                    vAlpha = smoothstep(-0.05, 0.3, facing);
-                    gl_PointSize = size * (250.0 / -mv.z) * (0.5 + 0.5 * vAlpha);
-                    gl_Position = projectionMatrix * mv;
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vColor;
-                varying float vAlpha;
-                void main() {
-                    float d = length(gl_PointCoord - 0.5);
-                    if (d > 0.5) discard;
-                    float a = smoothstep(0.5, 0.15, d) * vAlpha;
-                    gl_FragColor = vec4(vColor, a);
-                }
-            `,
-            transparent: true,
-            depthWrite: false,
+        // Graticule (latitude/longitude grid)
+        var gridMat = new THREE.LineBasicMaterial({
+            color: 0x1a2545, transparent: true, opacity: 0.15
         });
+        // Latitude lines every 30 degrees
+        for (var la = -60; la <= 60; la += 30) {
+            var pts = [];
+            for (var lo = 0; lo <= 360; lo += 2) {
+                pts.push(ll2v(la, lo - 180, R * 1.001));
+            }
+            globe.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(pts), gridMat
+            ));
+        }
+        // Longitude lines every 30 degrees
+        for (var lo = 0; lo < 360; lo += 30) {
+            var pts = [];
+            for (var la = -90; la <= 90; la += 2) {
+                pts.push(ll2v(la, lo - 180, R * 1.001));
+            }
+            globe.add(new THREE.Line(
+                new THREE.BufferGeometry().setFromPoints(pts), gridMat
+            ));
+        }
 
-        globe.add(new THREE.Points(geo, mat));
-
-        // Subtle atmosphere ring
-        const atmosGeo = new THREE.SphereGeometry(R * 1.04, 64, 64);
-        const atmosMat = new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                void main() {
-                    vNormal = normalize(normalMatrix * normal);
-                    vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vNormal;
-                varying vec3 vPosition;
-                void main() {
-                    float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-                    gl_FragColor = vec4(0.30, 0.49, 1.0, intensity * 0.25);
-                }
-            `,
+        // Subtle atmosphere rim glow
+        var atmosGeo = new THREE.SphereGeometry(R * 1.015, 64, 64);
+        var atmosMat = new THREE.ShaderMaterial({
+            vertexShader: [
+                'varying vec3 vNormal;',
+                'void main() {',
+                '  vNormal = normalize(normalMatrix * normal);',
+                '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+                '}'
+            ].join('\n'),
+            fragmentShader: [
+                'varying vec3 vNormal;',
+                'void main() {',
+                '  float rim = 1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0));',
+                '  float glow = pow(rim, 4.0) * 0.5;',
+                '  gl_FragColor = vec4(0.3, 0.48, 1.0, glow * 0.12);',
+                '}'
+            ].join('\n'),
             transparent: true,
             side: THREE.BackSide,
-            depthWrite: false,
+            depthWrite: false
         });
         globe.add(new THREE.Mesh(atmosGeo, atmosMat));
 
-        // Subtle latitude/longitude lines
-        const gridMat = new THREE.LineBasicMaterial({ color: 0x1a2040, transparent: true, opacity: 0.12 });
-        // Latitude
-        for (let lat = -60; lat <= 60; lat += 30) {
-            const pts = [];
-            for (let lon = 0; lon <= 360; lon += 3) {
-                pts.push(ll2v(lat, lon - 180, R * 1.001));
+        // Materials for borders
+        var countryMat = new THREE.LineBasicMaterial({
+            color: 0x2a3560, transparent: true, opacity: 1.0
+        });
+        var pakistanBorderMat = new THREE.LineBasicMaterial({
+            color: 0x4d7cff, transparent: true, opacity: 1.0
+        });
+        var pakistanFillMat = new THREE.ShaderMaterial({
+            uniforms: { uPR: { value: renderer.getPixelRatio() } },
+            vertexShader: [
+                'uniform float uPR;',
+                'attribute vec3 color;',
+                'varying vec3 vCol;',
+                'void main() {',
+                '  vCol = color;',
+                '  gl_PointSize = uPR * 1.8;',
+                '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+                '}'
+            ].join('\n'),
+            fragmentShader: [
+                'varying vec3 vCol;',
+                'void main() {',
+                '  float d = length(gl_PointCoord - 0.5);',
+                '  if (d > 0.5) discard;',
+                '  float a = smoothstep(0.5, 0.2, d) * 0.75;',
+                '  gl_FragColor = vec4(vCol, a);',
+                '}'
+            ].join('\n'),
+            transparent: true,
+            depthWrite: false
+        });
+
+        // Draw a GeoJSON geometry as lines on the globe
+        function drawGeometry(geom, material, radius) {
+            var coords;
+            if (geom.type === 'Polygon') {
+                coords = [geom.coordinates];
+            } else if (geom.type === 'MultiPolygon') {
+                coords = geom.coordinates;
+            } else {
+                return;
             }
-            const g = new THREE.BufferGeometry().setFromPoints(pts);
-            globe.add(new THREE.Line(g, gridMat));
-        }
-        // Longitude
-        for (let lon = 0; lon < 360; lon += 30) {
-            const pts = [];
-            for (let lat = -90; lat <= 90; lat += 3) {
-                pts.push(ll2v(lat, lon - 180, R * 1.001));
-            }
-            const g = new THREE.BufferGeometry().setFromPoints(pts);
-            globe.add(new THREE.Line(g, gridMat));
+            coords.forEach(function(polygon) {
+                polygon.forEach(function(ring) {
+                    if (ring.length < 2) return;
+                    var points = [];
+                    for (var i = 0; i < ring.length; i++) {
+                        var lon = ring[i][0], lat = ring[i][1];
+                        points.push(ll2v(lat, lon, radius));
+                        // Break long segments to follow the curve
+                        if (i < ring.length - 1) {
+                            var nextLon = ring[i+1][0], nextLat = ring[i+1][1];
+                            var dlon = Math.abs(nextLon - lon);
+                            var dlat = Math.abs(nextLat - lat);
+                            if (dlon > 5 || dlat > 5) {
+                                var steps = Math.ceil(Math.max(dlon, dlat) / 3);
+                                for (var s = 1; s < steps; s++) {
+                                    var t = s / steps;
+                                    var iLat = lat + (nextLat - lat) * t;
+                                    var iLon = lon + (nextLon - lon) * t;
+                                    points.push(ll2v(iLat, iLon, radius));
+                                }
+                            }
+                        }
+                    }
+                    var geo = new THREE.BufferGeometry().setFromPoints(points);
+                    globe.add(new THREE.Line(geo, material));
+                });
+            });
         }
 
-        // Pakistan glow (small, tight)
-        const pkCenter = ll2v(30, 68.5, R * 1.01);
-        const glowGeo = new THREE.SphereGeometry(0.07, 16, 16);
-        const glowMat = new THREE.MeshBasicMaterial({ color: 0x4d7cff, transparent: true, opacity: 0.3 });
-        const glowMesh = new THREE.Mesh(glowGeo, glowMat);
-        glowMesh.position.copy(pkCenter);
-        globe.add(glowMesh);
+        // Point-in-polygon test for filling Pakistan
+        function pointInPolygon(lat, lon, rings) {
+            for (var r = 0; r < rings.length; r++) {
+                var ring = rings[r];
+                var inside = false;
+                for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                    var xi = ring[i][0], yi = ring[i][1];
+                    var xj = ring[j][0], yj = ring[j][1];
+                    if ((yi > lat) !== (yj > lat) &&
+                        lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) {
+                        inside = !inside;
+                    }
+                }
+                if (r === 0 && !inside) return false;
+                if (r > 0 && inside) return false; // hole
+            }
+            return true;
+        }
 
-        // Start rotation facing Pakistan
+        // Fill a country with dots
+        function fillCountry(feature, color, radius) {
+            var coords;
+            if (feature.geometry.type === 'Polygon') {
+                coords = [feature.geometry.coordinates];
+            } else {
+                coords = feature.geometry.coordinates;
+            }
+
+            var positions = [], colors = [];
+
+            coords.forEach(function(polygon) {
+                // Get bounding box
+                var minLon = 999, maxLon = -999, minLat = 999, maxLat = -999;
+                polygon[0].forEach(function(c) {
+                    if (c[0] < minLon) minLon = c[0];
+                    if (c[0] > maxLon) maxLon = c[0];
+                    if (c[1] < minLat) minLat = c[1];
+                    if (c[1] > maxLat) maxLat = c[1];
+                });
+
+                // Fill with uniform dots
+                var step = 0.4; // degree spacing
+                for (var lat = minLat; lat <= maxLat; lat += step) {
+                    for (var lon = minLon; lon <= maxLon; lon += step) {
+                        if (pointInPolygon(lat, lon, polygon)) {
+                            var p = ll2v(lat, lon, radius);
+                            positions.push(p.x, p.y, p.z);
+                            colors.push(color[0], color[1], color[2]);
+                        }
+                    }
+                }
+            });
+
+            if (positions.length > 0) {
+                var geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                globe.add(new THREE.Points(geo, pakistanFillMat));
+            }
+        }
+
+        // Kashmir region claimed by Pakistan (Indian-administered J&K + Ladakh)
+        // as per Pakistan's official map which includes the full former princely state
+        var kashmirClaim = [
+            // Southern end of LoC near Jammu, going north along LoC
+            [74.40, 32.50],
+            [74.50, 32.80],
+            [74.60, 33.10],
+            [74.70, 33.40],
+            [74.80, 33.70],
+            [75.00, 34.00],
+            [75.20, 34.30],
+            [75.50, 34.60],
+            [75.80, 34.80],
+            [76.20, 35.00],
+            [76.50, 35.10],
+            [76.80, 35.20],
+            // NJ9842 / Siachen area — turn east along Karakoram / Chinese border
+            [77.10, 35.50],
+            [77.50, 35.80],
+            [77.80, 36.00],
+            [78.20, 35.90],
+            [78.60, 35.70],
+            [79.00, 35.40],
+            // Eastern boundary — LAC / Chinese border through Ladakh
+            [79.50, 35.00],
+            [80.00, 34.40],
+            [80.20, 33.80],
+            [80.00, 33.20],
+            [79.50, 32.80],
+            [79.00, 32.50],
+            // South along Ladakh then international border back west
+            [78.50, 32.30],
+            [78.00, 32.10],
+            [77.50, 32.20],
+            [77.00, 32.30],
+            [76.50, 32.40],
+            [76.00, 32.50],
+            [75.50, 32.40],
+            [75.00, 32.50],
+            // Close back to start
+            [74.40, 32.50]
+        ];
+
+        // Create a fake GeoJSON feature for the Kashmir claim
+        var kashmirFeature = {
+            geometry: {
+                type: 'Polygon',
+                coordinates: [kashmirClaim]
+            }
+        };
+
+        // Disputed boundary material — dashed-style (slightly different from solid PK border)
+        var disputedBorderMat = new THREE.LineBasicMaterial({
+            color: 0x4d7cff, transparent: true, opacity: 0.8
+        });
+
+        // Load world map data
+        var WORLD_URL = 'https://unpkg.com/world-atlas@2/countries-110m.json';
+
+        fetch(WORLD_URL)
+            .then(function(res) { return res.json(); })
+            .then(function(topo) {
+                var countries = topojson.feature(topo, topo.objects.countries);
+
+                countries.features.forEach(function(feature) {
+                    var isPK = (feature.id === '586');   // Pakistan
+                    var isIN = (feature.id === '356');   // India
+
+                    if (isPK) {
+                        // Draw Pakistan border bright blue
+                        drawGeometry(feature.geometry, pakistanBorderMat, R * 1.003);
+                        // Fill Pakistan with blue dots
+                        fillCountry(feature, [0.30, 0.49, 1.0], R * 1.002);
+                    } else if (isIN) {
+                        // Draw India but at base level (Kashmir overlay will cover disputed area)
+                        drawGeometry(feature.geometry, countryMat, R * 1.001);
+                    } else {
+                        drawGeometry(feature.geometry, countryMat, R * 1.001);
+                    }
+                });
+
+                // Add Kashmir claimed territory — drawn on top as part of Pakistan
+                drawGeometry(kashmirFeature.geometry, disputedBorderMat, R * 1.004);
+                fillCountry(kashmirFeature, [0.30, 0.49, 1.0], R * 1.003);
+            })
+            .catch(function(err) {
+                console.warn('Could not load world map data:', err);
+            });
+
+        // Initial rotation to face Pakistan (approx lon 69, lat 30)
         globe.rotation.y = -1.2;
         globe.rotation.x = 0.15;
 
-        let scrollSpeed = 0, lastScroll = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const d = Math.abs(window.scrollY - lastScroll);
-            scrollSpeed = Math.min(d * 0.0003, 0.025);
-            lastScroll = window.scrollY;
+        // Scroll-based speed boost
+        var scrollSpd = 0, lastScr = window.scrollY;
+        window.addEventListener('scroll', function() {
+            var d = Math.abs(window.scrollY - lastScr);
+            scrollSpd = Math.min(d * 0.0004, 0.03);
+            lastScr = window.scrollY;
         });
 
-        function animate() {
+        // Animation loop
+        (function animate() {
             requestAnimationFrame(animate);
-            globe.rotation.y += 0.0015 + scrollSpeed;
-            scrollSpeed *= 0.95;
-            const t = Date.now() * 0.002;
-            glowMesh.scale.setScalar(1 + Math.sin(t) * 0.2);
-            glowMesh.material.opacity = 0.25 + Math.sin(t) * 0.1;
+            globe.rotation.y += 0.0015 + scrollSpd;
+            scrollSpd *= 0.94;
             renderer.render(scene, camera);
-        }
-        animate();
+        })();
 
-        window.addEventListener('resize', () => {
-            const nw = container.clientWidth, nh = container.clientHeight;
+        // Handle resize
+        window.addEventListener('resize', function() {
+            var nw = container.clientWidth, nh = container.clientHeight;
             camera.aspect = nw / nh;
             camera.updateProjectionMatrix();
             renderer.setSize(nw, nh);
